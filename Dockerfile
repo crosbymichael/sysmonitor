@@ -1,7 +1,7 @@
-FROM crosbymichael/hy
+FROM crosbymichael/python
 
-RUN pip install psutil influxdb
+RUN pip install rethinkdb psutil
 ADD . /files
 
-ENTRYPOINT ["hy", "/files/monitor.hy"]
+ENTRYPOINT ["python", "/files/monitor.py"]
 
