@@ -7,7 +7,7 @@ duration = int(getenv('DURATION', 60))
 
 def collect_data():
     return {
-            'timestamep': r.now(),
+            'timestamp': r.now(),
             'cpu': cpu_percent(),
             'memory': virtual_memory().percent,
             'swap': swap_memory().percent,
