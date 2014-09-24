@@ -29,6 +29,6 @@ def main():
     if not url:
         raise Exception("RETHINKDB_ADDR not found in environment")
     conn = r.connect(host=url, db='metrics')
-    monitor(conn, r.db(db_name).table('hosts'))
+    monitor(conn, r.db(db_name).table('host'))
 
 if __name__=='__main__': main()
