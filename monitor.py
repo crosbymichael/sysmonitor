@@ -1,34 +1,34 @@
 from psutil import cpu_times, cpu_percent, virtual_memory, swap_memory, disk_usage
 from time import sleep
 from os import getenv
-from influxdb import InfluxDBClient
+import socket
+import rethinkdb as r
 
 duration = int(getenv('DURATION', 60))
 
-def collect_data(table):
-    return [{
-        'points': [
-            [cpu_percent(), virtual_memory().percent, swap_memory().percent, disk_usage('/').percent]
-        ],
-        'name': table,
-        'columns': ['cpu', 'memory', 'swap', 'disk']
-    }]
+def collect_data(hostname):
+    return {
+            'timestamp': r.now(),
+            'host': hostname,
+            'cpu': cpu_percent(),
+            'memory': virtual_memory().percent,
+            'swap': swap_memory().percent,
+            'disk': disk_usage('/').percent,
+    }
 
-def monitor(client, table):
+def monitor(conn, table):
+    hostname = socket.gethostname()
     while True:
-        data = collect_data(table)
-        client.write_points(data)
+        data = collect_data(hostname)
+        table.insert(data).run(conn)
         sleep(duration)
+    conn.close()
 
 def main():
-    host = getenv('INFLUX_HOST')
-    user = getenv('INFLUX_USER')
-    password = getenv('INFLUX_PASSWORD')
-    db = getenv('INFLUX_DB')
-    table = getenv('INFLUX_TABLE')
-
-    client = InfluxDBClient(host, 8086, user, password, db)
-
-    monitor(client, table)
+    url = getenv('RETHINKDB_ADDR')
+    if not url:
+        raise Exception("RETHINKDB_ADDR not found in environment")
+    conn = r.connect(host=url, db='metrics')
+    monitor(conn, r.db(db_name).table('hosts'))
 
 if __name__=='__main__': main()
