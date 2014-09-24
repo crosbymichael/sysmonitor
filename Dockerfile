@@ -1,6 +1,6 @@
 FROM crosbymichael/python
 
-RUN pip install influxdb psutil
+RUN pip install rethinkdb psutil
 ADD . /monitor
 
 ENTRYPOINT ["python", "/monitor/monitor.py"]
